@@ -1,0 +1,3083 @@
+﻿1-'3'-3 answer
+1-'4'-a
+Anonymous vs named function
+Svg vs canvas
+Service vs factory
+Bootstrapping of angular
+Build tools
+Two js files in script tags and console.log problem
+Closures
+Let vs var
+Webpack config file
+Js loads its files asyn or syn
+Jqlite vs jQuery
+
+
+http://javascriptissexy.com/javascript-objects-in-detail/
+
+
+js variables are stored as values
+eg
+var a="asd";
+But if use object notation it becomes stored as reference.
+var a={name:"asd"};
+objects are stored as references.
+
+
+object data properties have given 3 attributes:-
+1. Configurable attribute
+2.Enumerable
+3. Writable
+
+
+
+
+https://github.com/getify/You-Dont-Know-JS/blob/master/up%20%26%20going/ch2.md
+
+
+dom --.global variable --not provided by JS engine
+IO functions like alert prompt are given by browser
+like console.log()
+
+
+
+
+https://github.com/getify/You-Dont-Know-JS
+
+
+he content for these books derives heavily from a series of training materials I teach professionally (in both public and private-corporate workshop format), called "Advanced JS: The 'What You Need To
+
+
+
+
+javascipt cannot access file  system.
+
+
+Nodejs -->built in V8 engine, open source, cross platform run time environment .[serverside platform].
+
+
+platform VS framwork Vs library
+
+
+w8/linux is platform, struts/angular-->framework, jquery/bootstrap--> library
+
+
+
+
+
+
+
+
+https://toddmotto.com/factory-versus-service
+
+
+With .factory(), we can create various Objects, such as new Class instances (with .prototype or ES2015 Classes), return Object literals, return functions and closures, or even just return a simply String
+
+
+
+
+http://stackoverflow.com/questions/13762228/confused-about-service-vs-factory#
+
+
+The main features of Service:
+
+
+Lazily Instantiated: If the service is not injected it won't be instantiated ever. So to use it you will have to inject it to a module.
+Singleton: If it is injected to multiple modules, all will have access to only one particular instance. That is why, it is very convenient to share data across different controllers.
+
+
+
+
+http://stackoverflow.com/questions/13762228/confused-about-service-vs-factory
+
+
+function provider(name, provider_) {
+    if (isFunction(provider_)) {
+      provider_ = providerInjector.instantiate(provider_);
+    }
+    if (!provider_.$get) {
+      throw Error('Provider ' + name + ' must define $get factory method.');
+    }
+    return providerCache[name + providerSuffix] = provider_;
+  }
+
+
+  function factory(name, factoryFn) { \
+    return provider(name, { $get: factoryFn });
+  }
+
+
+  function service(name, constructor) {
+    return factory(name, ['$injector', function($injector) {
+      return $injector.instantiate(constructor);
+    }]);
+  }
+
+
+The "injector" is an object in angular. It's in charge of doing the "injection". Example, when the controller is first run the "injector" looks at the parameters and injects each one. There is only one "injector" for your whole app. Once the injector creates a particular factory or service it keeps an instance to it and reuses it - hence the singleton. So there is only one injector per app and only one instance of a given service per injector. Most Angular applications only have one app, therefore one injector, therefore one instance of any service, controller, etc
+
+
+The "injector" is an object in angular. It's in charge of doing the "injection". Example, when the controller is first run the "injector" looks at the parameters and injects each one. There is only one "injector" for your whole app. Once the injector creates a particular factory or service it keeps an instance to it and reuses it - hence the singleton. So there is only one injector per app and only one instance of a given service per injector. Most Angular applications only have one app, therefore one injector, therefore one instance of any service, controller, etc
+
+
+
+
+http://stackoverflow.com/questions/13762228/confused-about-service-vs-factory
+
+
+factories <====> Providers $get function <===>Services[generate  factories] using $injector.instantiate on every function[ call new ]
+
+
+All three are singleton.
+
+
+app.factory('a', fn);
+app.service('b', fn);
+app.provider('c', fn);
+The difference between the three is that:
+
+
+a's stored value comes from running fn , in other words: fn()
+b’s stored value comes from newing fn, in other words: new fn()
+c’s stored value comes from first getting an instance by newing fn, and then running a $get method of the instance
+which means, there’s something like a cache object inside angular, whose value of each injection is only assigned once, when they've been injected the first time, and where:
+
+
+cache.a = fn()
+cache.b = new fn()
+cache.c = (new fn()).$get()
+
+
+app.factory('a', fn);
+app.service('b', fn);
+app.provider('c', fn);
+The difference between the three is that:
+
+
+a's stored value comes from running fn , in other words: fn()
+b’s stored value comes from newing fn, in other words: new fn()
+c’s stored value comes from first getting an instance by newing fn, and then running a $get method of the instance
+which means, there’s something like a cache object inside angular, whose value of each injection is only assigned once, when they've been injected the first time, and where:
+
+
+cache.a = fn()
+cache.b = new fn()
+cache.c = (new fn()).$get()
+
+
+
+
+http://stackoverflow.com/questions/13762228/confused-about-service-vs-factory
+
+
+var myApp = angular.module('myApp', []);
+
+
+//service style, probably the simplest one
+myApp.service('helloWorldFromService', function() {
+    this.sayHello = function() {
+        return "Hello, World!"
+    };
+});
+
+
+//factory style, more involved but more sophisticated
+myApp.factory('helloWorldFromFactory', function() {
+    return {
+        sayHello: function() {
+            return "Hello, World!"
+        }
+    };
+});
+
+
+//provider style, full blown, configurable version    
+myApp.provider('helloWorld', function() {
+    // In the provider function, you cannot inject any
+    // service or factory. This can only be done at the
+    // "$get" method.
+
+
+    this.name = 'Default';
+
+
+    this.$get = function() {
+        var name = this.name;
+        return {
+            sayHello: function() {
+                return "Hello, " + name + "!"
+            }
+        }
+    };
+
+
+    this.setName = function(name) {
+        this.name = name;
+    };
+});
+
+
+//hey, we can configure a provider!           
+myApp.config(function(helloWorldProvider){
+    helloWorldProvider.setName('World');
+});
+
+
+function MyCtrl($scope, helloWorld, helloWorldFromFactory, helloWorldFromService) {
+
+
+    $scope.hellos = [
+        helloWorld.sayHello(),
+        helloWorldFromFactory.sayHello(),
+        helloWorldFromService.sayHello()];
+}​
+
+
+
+
+http://stackoverflow.com/questions/23074875/angularjs-factory-and-service
+
+
+factories-->
+1. return function,
+2. have a return always;
+
+
+
+
+Services --->
+1. this. something
+2. Uses new keyword.
+3.
+
+
+
+
+https://yorbit.mindtree.com/
+
+
+1. add meta viewport +intial scale to page
+2. adjust css and markup set relative widths every where
+3. make touch target a, button as 48*48 px
+4. test it across different broswers.
+
+
+Media query   3 ways
+1.  media="screen and min-width:500px )"
+
+
+2.  @media screen and (min-width:500px){
+body{ color : red };
+}
+
+
+3.   import url("cssFile.css")  only screen and (min-width:500px);  -->cause preformance issues
+
+
+max-width:600px
+
+
+How to make set breakpoints in site
+Check on the content.
+
+
+
+
+use
+<script type="text/javascript">
+
+
+<!--  data to be ignored by old browsers
+//-->
+
+
+// single line comment
+/*
+multiple line comment
+*/
+document.write("ajidfsi"); document.write("ajidfsi");
+will print in one line
+
+
+escape character
+
+
+"askldfjasdf  \"asdfasdfasdf\"" print " ";
+
+
+</script>
+
+
+csss
+content="width=device-width, initial-scale=1"
+
+
+
+
+compile() ---> create(), init() or configure(). --->function is only called once.
+
+
+link()----> bind() or render(), ----> whenever the directive needs to bind data to it, or to re-render it.
+
+
+.directive('multipleValidator', [function(){
+  return {
+    restrict: 'AC',
+    require: 'ngModel',
+    priority:1000,
+    link: function(scope, elem, attr, ngModelCtrl) {
+
+
+        elem.on('blur', function (event) {
+          console.log(event.target.value);
+          if (event.target.value==="null" ||event.target.value==="unk") {
+          angular.element("#"+event.target.id).parent().addClass("error");
+          angular.element('#' + event.target.id).attr("data-original-title", "bad name" );
+
+
+        }else {
+            angular.element("#"+event.target.id).parent().removeClass("error");
+            angular.element('#' + event.target.id).attr("data-original-title", "" );
+        }
+
+
+        });
+    }
+  }
+}]);
+
+
+
+
+- levelOne: compile
+- levelTwo: compile
+- levelThree: compile
+- levelOne: pre link
+- levelTwo: pre link
+- levelTwo: post link
+- levelOne: post link
+- levelThree: pre link
+- levelThree post link
+
+
+As you can see, the levelThree pre and post link functions are indeed called after the levelOne post link function.
+
+
+This happens because AngularJS:
+
+
+- compiles all code
+- links level one and two
+- watches the ng-repeat expression
+- stamps out the levelThree instances every time the ng-repeat expression evaluates differently
+
+
+So it is the dynamic nature of ng-repeat that causes the linking functions of the stamped instances to occur after the initial compilation and linking of the parent elements.
+
+
+
+
+var app = angular.module('plunker', []);
+
+
+function createDirective(name){
+  return function(){
+    return {
+      restrict: 'E',
+      compile: function(tElem, tAttrs){
+        console.log(name + ': compile-------------'+tElem.html());
+        return {
+          pre: function(scope, iElem, iAttrs){
+            console.log(name + ': pre link======='+iElem.html());
+          },
+          post: function(scope, iElem, iAttrs){
+            console.log(name + ': post link*******'+iElem.html());
+          }
+        }
+      }
+    }
+  }
+}
+
+
+app.controller('MainController', function($scope, $interval){
+  var i = 1;
+  $scope.values = [];
+  $interval(function(){
+    $scope.values = [i++, i++];
+  }, 3000);
+})
+
+
+app.directive('levelOne', createDirective('level_1'));
+app.directive('levelTwo', createDirective('level_2'));
+app.directive('levelThree', createDirective('level_3'));
+
+
+VM322 app.js:8 level_1: compile-------------
+      <level-two ng-controller="MainController">
+       <div ng-repeat="i in ['1','2']">
+          <level-three>
+            Hello {{i}}
+          </level-three>
+         </div>
+      </level-two>
+   
+VM322 app.js:8 level_2: compile-------------
+       <div ng-repeat="i in ['1','2']">
+          <level-three>
+            Hello {{i}}
+          </level-three>
+         </div>
+     
+VM322 app.js:8 level_3: compile-------------
+            Hello {{i}}
+         
+VM322 app.js:11 level_1: pre link=======
+      <level-two ng-controller="MainController" class="ng-scope">
+       <!-- ngRepeat: i in ['1','2'] -->
+      </level-two>
+   
+VM322 app.js:11 level_2: pre link=======
+       <!-- ngRepeat: i in ['1','2'] -->
+     
+VM322 app.js:14 level_2: post link*******
+       <!-- ngRepeat: i in ['1','2'] -->
+     
+VM322 app.js:14 level_1: post link*******
+      <level-two ng-controller="MainController" class="ng-scope">
+       <!-- ngRepeat: i in ['1','2'] -->
+      </level-two>
+   
+VM322 app.js:11 level_3: pre link=======
+            Hello {{i}}
+         
+VM322 app.js:14 level_3: post link*******
+            Hello {{i}}
+         
+VM322 app.js:11 level_3: pre link=======
+            Hello {{i}}
+         
+VM322 app.js:14 level_3: post link*******
+            Hello {{i}}         
+
+
+
+
+http://stackoverflow.com/questions/13286233/pass-a-javascript-function-as-parameter
+
+
+You just need to remove the parenthesis:
+
+
+addContact(entityId, refreshContactList);
+This then passes the function without executing it first.
+
+
+Here is an example:
+
+
+function addContact(id, refreshCallback) {
+    refreshCallback();
+    // You can also pass arguments if you need to
+    // refreshCallback(id);
+}
+
+
+function refreshContactList() {
+    alert('Hello World');
+}
+
+
+addContact(1, refreshContactList);
+
+
+function eat(food1, food2)
+{
+    alert("I like to eat " + food1 + " and " + food2 );
+}
+function myFunc(callback, args)
+{
+    //do stuff
+    //...
+    //execute callback when finished
+    callback.apply(this, args);
+}
+
+
+//alerts "I like to eat pickles and peanut butter"
+myFunc(eat, ["pickles", "peanut butter"]);
+
+
+
+
+If you want to pass a function, just reference it by name without the parentheses:
+
+
+function foo(x) {
+    alert(x);
+}
+function bar(func) {
+    func("Hello World!");
+}
+
+
+//alerts "Hello World!"
+bar(foo);
+But sometimes you might want to pass a function with arguments included, but not have it called until the callback is invoked. To do this, when calling it, just wrap it in an anonymous function, like this:
+
+
+function foo(x) {
+   alert(x);
+}
+function bar(func) {
+   func();
+}
+
+
+//alerts "Hello World!" (from within bar AFTER being passed)
+bar(function(){ foo("Hello World!") });
+
+
+
+
+http://www.web-technology-experts-notes.in/2015/04/javascript-interview-questions-and-answers-for-experienced-2.html
+
+
+: How to modify the URL of page without reloading the page?
+use pushState javascript function.
+For Example:
+window.history.pushState('page2', 'This is page Title', '/newpage.php');
+
+
+console.log(typeof(null));      // object
+console.log(typeof(undefined)); // undefined
+
+
+declare a namespace in JavaScript?
+var myNamespace = {
+
+
+    function1: function() {   },
+
+
+    function2: function() {    }
+
+
+    function3: function() {    }
+};
+
+
+myNamespace.function3();
+
+
+
+
+https://bytearcher.com/articles/es6-vs-es2015-name/
+
+
+e ES6 to refer to "ECMAScript 2015 Language" (arrow functions, template strings, Promises), it's shorter than ES2015 and both are unofficial, ES6 was the last big release and the name is in line with the previous big release ES5,
+
+
+ECMAScript[version]= ES[version]=year+1;
+
+
+
+
+https://www.codementor.io/nihantanu/21-essential-javascript-tech-interview-practice-questions-answers-du107p62z
+
+
+Question 1
+What is the difference between undefined and not defined in JavaScript?
+In JavaScript, if you try to use a variable that doesn't exist and has not been declared, then JavaScript will throw an error var name is not defined and script will stop executing. However, if you use typeof undeclared_variable, then it will return undefined.
+
+
+Before getting further into this, let's first understand the difference between declaration and definition.
+
+
+Let's say var x is a declaration because you have not defined what value it holds yet, but you have declared its existence and the need for memory allocation.
+
+
+> var x; // declaring x
+> console.log(x); //output: undefined
+Here var x = 1 is both a declaration and definition (also we can say we are doing an initialisation). In the example above, the declaration and assignment of value happen inline for variable x. In JavaScript, every variable or function declaration you bring to the top of its current scope is called hoisting.
+
+
+The assignment happens in order, so when we try to access a variable that is declared but not defined yet, we will get the result undefined.
+
+
+var x; // Declaration
+if(typeof x === 'undefined') // Will return true
+
+
+If a variable that is neither declared nor defined, when we try to reference such a variable we'd get the result not defined.
+
+
+> console.log(y);  // Output: ReferenceError: y is not defined
+Question 2
+What will be the output of the code below?
+var y = 1;
+  if (function f(){}) {
+    y += typeof f;
+  }
+  console.log(y);
+The output would be 1undefined. The if condition statement evaluates using eval, so eval(function f(){}) returns function f(){} (which is true). Therefore, inside the if statement, executing typeof f returns undefined because the if statement code executes at run time, and the statement inside the if condition is evaluated during run time.
+
+
+var k = 1;
+  if (1) {
+    eval(function foo(){});
+    k += typeof foo;
+  }
+  console.log(k);
+The code above will also output 1undefined.
+
+
+var k = 1;
+  if (1) {
+    function foo(){};
+    k += typeof foo;
+  }
+  console.log(k); // output 1function
+Question 3
+What is the drawback of creating true private methods in JavaScript?
+One of the drawbacks of creating true private methods in JavaScript is that they are very memory-inefficient, as a new copy of the method would be created for each instance.
+
+
+var Employee = function (name, company, salary) {
+    this.name = name || "";       //Public attribute default value is null
+    this.company = company || ""; //Public attribute default value is null
+    this.salary = salary || 5000; //Public attribute default value is null
+
+
+    // Private method
+    var increaseSalary = function () {
+        this.salary = this.salary + 1000;
+    };
+
+
+    // Public method
+    this.dispalyIncreasedSalary = function() {
+        increaseSlary();
+        console.log(this.salary);
+    };
+};
+
+
+// Create Employee class object
+var emp1 = new Employee("John","Pluto",3000);
+// Create Employee class object
+var emp2 = new Employee("Merry","Pluto",2000);
+// Create Employee class object
+var emp3 = new Employee("Ren","Pluto",2500);
+Here each instance variable emp1, emp2, emp3 has its own copy of the increaseSalary private method.
+
+
+So, as a recommendation, don’t use private methods unless it’s necessary.
+
+
+Want to ace your technical interview? Schedule a Technical Interview Practice Session with an expert now!
+
+
+Question 4
+What is a “closure” in JavaScript? Provide an example
+A closure is a function defined inside another function (called the parent function), and has access to variables that are declared and defined in the parent function scope.
+
+
+The closure has access to variables in three scopes:
+
+
+Variables declared in their own scope
+Variables declared in a parent function scope
+Variables declared in the global namespace
+var globalVar = "abc";
+
+
+// Parent self invoking function
+(function outerFunction (outerArg) { // begin of scope outerFunction
+    // Variable declared in outerFunction function scope
+    var outerFuncVar = 'x';   
+    // Closure self-invoking function
+    (function innerFunction (innerArg) { // begin of scope innerFunction
+        // variable declared in innerFunction function scope
+        var innerFuncVar = "y";
+        console.log(         
+            "outerArg = " + outerArg + "\n" +
+            "outerFuncVar = " + outerFuncVar + "\n" +
+            "innerArg = " + innerArg + "\n" +
+            "innerFuncVar = " + innerFuncVar + "\n" +
+            "globalVar = " + globalVar);
+
+
+    }// end of scope innerFunction)(5); // Pass 5 as parameter
+}// end of scope outerFunction )(7); // Pass 7 as parameter
+innerFunction is closure that is defined inside outerFunction and has access to all variables declared and defined in the outerFunction scope. In addition, the function defined inside another function as a closure will have access to variables declared in the global namespace.
+
+
+Thus, the output of the code above would be:
+
+
+outerArg = 7
+outerFuncVar = x
+innerArg = 5
+innerFuncVar = y
+globalVar = abc
+
+
+Question 5
+Write a mul function which will produce the following outputs when invoked:
+console.log(mul(2)(3)(4)); // output : 24
+console.log(mul(4)(3)(4)); // output : 48
+Below is the answer followed by an explanation to how it works:
+
+
+function mul (x) {
+    return function (y) { // anonymous function
+        return function (z) { // anonymous function
+            return x * y * z;
+        };
+    };
+}
+Here the mul function accepts the first argument and returns an anonymous function, which takes the second parameter and returns another anonymous function that will take the third parameter and return the multiplication of the arguments that have been passed.
+
+
+In JavaScript, a function defined inside another one has access to the outer function's variables. Therefore, a function is a first-class object that can be returned by other functions as well and be passed as an argument in another function.
+
+
+A function is an instance of the Object type
+A function can have properties and has a link back to its constructor method
+A function can be stored as a variable
+A function can be pass as a parameter to another function
+A function can be returned from another function
+<div style="text-align: center; background-color: #dff5ff; padding: 20px 0 20px 0;"><em style="font-family: Georgia, serif; color: #808080;">WATCH: <a style="font-family: Georgia, serif;" href="https://codementor.io/officehours/1335595426/live-mock-interview-javascript-front-end?utm_source=tutorial&utm_medium=internal&utm_campaign=outreach&utm_term=office-hours-20161020&utm_content=JS-interview-Qs" target="_blank">Mock technical interview (JavaScript)</a></em></div>
+
+
+Question 6
+How to empty an array in JavaScript ?
+For instance,
+
+
+var arrayList =  ['a','b','c','d','e','f'];
+How can we empty the array above?
+
+
+There are a couple ways we can use to empty an array, so let's discuss them all.
+
+
+Method 1
+
+
+arrayList = []
+Above code will set the variable arrayList to a new empty array. This is recommended if you don't have references to the original array arrayList anywhere else, because it will actually create a new, empty array. You should be careful with this method of emptying the array, because if you have referenced this array from another variable, then the original reference array will remain unchanged.
+
+
+For Instance,
+
+
+var arrayList = ['a','b','c','d','e','f']; // Created array
+var anotherArrayList = arrayList;  // Referenced arrayList by another variable
+arrayList = []; // Empty the array
+console.log(anotherArrayList); // Output ['a','b','c','d','e','f']
+Method 2
+
+
+arrayList.length = 0;
+The code above will clear the existing array by setting its length to 0. This way of emptying the array also updates all the reference variables that point to the original array. Therefore, this method is useful when you want to update all reference variables pointing to arrayList.
+
+
+For Instance,
+
+
+var arrayList = ['a','b','c','d','e','f']; // Created array
+var anotherArrayList = arrayList;  // Referenced arrayList by another variable
+arrayList.length = 0; // Empty the array by setting length to 0
+console.log(anotherArrayList); // Output []
+Method 3
+
+
+arrayList.splice(0, arrayList.length);
+The implementation above will also work perfectly. This way of emptying the array will also update all the references to the original array.
+
+
+var arrayList = ['a','b','c','d','e','f']; // Created array
+var anotherArrayList = arrayList;  // Referenced arrayList by another variable
+arrayList.splice(0, arrayList.length); // Empty the array by setting length to 0
+console.log(anotherArrayList); // Output []
+Method 4
+while(arrayList.length){
+  arrayList.pop();
+}
+The implementation above can also empty arrays, but it is usually not recommended to use this method often.
+
+
+Question 7
+How do you check if an object is an array or not?
+The best way to find out whether or not an object is an instance of a particular class is to use the toString method from Object.prototype:
+
+
+  var arrayList = [1,2,3];
+One of the best use cases of type-checking an object is when we do method overloading in JavaScript. For example, let's say we have a method called greet, which takes one single string and also a list of strings. To make our greet method workable in both situations, we need to know what kind of parameter is being passed. Is it a single value or a list of values?
+
+
+function greet(param){
+if(){ // here have to check whether param is array or not
+}else{
+}
+}
+However, as the implementation above might not necessarily check the type for arrays, we can check for a single value string and put some array logic code in the else block. For example:
+
+
+function greet(param){
+if(typeof param === 'string'){
+}else{
+  // If param is of type array then this block of code would execute
+}
+}
+Now it's fine we can go with either of the aforementioned two implementations, but when we have a situation where the parameter can be single value, array, and object type, we will be in trouble.
+
+
+Coming back to checking the type of an object, as mentioned previously we can use Object.prototype.toString
+
+
+if( Object.prototype.toString.call( arrayList ) === '[object Array]' ) {
+    console.log('Array!');
+}
+If you are using jQuery, then you can also use the jQuery isArray method:
+
+
+  if($.isArray(arrayList)){
+    console.log('Array');
+  }else{
+  console.log('Not an array');
+  }
+FYI, jQuery uses Object.prototype.toString.call internally to check whether an object is an array or not.
+
+
+In modern browsers, you can also use
+
+
+Array.isArray(arrayList);
+Array.isArray is supported by Chrome 5, Firefox 4.0, IE 9, Opera 10.5 and Safari 5
+
+
+Question 8
+What will be the output of the following code?
+var output = (function(x){
+    delete x;
+    return x;
+  })(0);
+ 
+  console.log(output);
+The output would be 0. The delete operator is used to delete properties from an object. Here x is not an object but a local variable. delete operators don't affect local variables.
+
+
+Question 9
+What will be the output of the following code?
+var x = 1;
+var output = (function(){
+    delete x;
+    return x;
+  })();
+ 
+  console.log(output);
+The output would be 1. The delete operator is used to delete the property of an object. Here x is not an object, but rather it's the global variable of type number.
+
+
+Question 10
+What will be the output of the code below?
+var x = { foo : 1};
+var output = (function(){
+    delete x.foo;
+    return x.foo;
+  })();
+ 
+  console.log(output);
+The output would be undefined. The delete operator is used to delete the property of an object. Here, x is an object which has the property foo, and as it is a self-invoking function, we will delete the foo property from object x. After doing so, when we try to reference a deleted property foo, the result isundefined.
+
+
+Question 11
+What will be the output of the code below?
+var Employee = {
+  company: 'xyz'
+}
+var emp1 = Object.create(Employee);
+delete emp1.company
+console.log(emp1.company);
+The output would be xyz. Here, emp1 object has company as its prototype property. The delete operator doesn't delete prototype property.
+
+
+emp1 object doesn't have company as its own property. You can test it console.log(emp1.hasOwnProperty('company')); //output : false. However, we can delete the company property directly from theEmployee object using delete Employee.company. Or, we can also delete the emp1 object using the __proto__ property delete emp1.__proto__.company.
+
+
+Question 12
+What is undefined x 1 in JavaScript?
+var trees = ["redwood","bay","cedar","oak","maple"];
+delete trees[3];
+When you run the code above and type console.log(trees); into your Chrome developer console, you will get ["redwood", "bay", "cedar", undefined × 1, "maple"]. When you run the code in Firefox's browser console, you will get ["redwood", "bay", "cedar", undefined, "maple"]. Thus, it's clear that the Chrome browser has its own way of displaying uninitialised indexes in arrays. However, when you check trees[3] === undefined in both browsers, you will get similar output as true.
+
+
+Note: Please remember you do not need to check for the uninitialised index of array in trees[3] === 'undefined × 1', as it will give you an error. 'undefined × 1' is just way of displaying an array's uninitialised index in Chrome.
+
+
+Question 13
+What will be the output of the code below?
+var trees = ["xyz","xxxx","test","ryan","apple"];
+delete trees[3];
+ 
+  console.log(trees.length);
+The output would be 5. When we use the delete operator to delete an array element, the array length is not affected from this. This holds even if you deleted all elements of an array using the delete operator.
+
+
+In other words, when the delete operator removes an array element, that deleted element is not longer present in array. In place of value at deleted index undefined x 1 in chrome and undefined is placed at the index. If you do console.log(trees) output ["xyz", "xxxx", "test", undefined × 1, "apple"] in Chrome and in Firefox ["xyz", "xxxx", "test", undefined, "apple"].
+
+
+Question 14
+What will be the output of the code below?
+var bar = true;
+console.log(bar + 0);  
+console.log(bar + "xyz"); 
+console.log(bar + true); 
+console.log(bar + false);  
+The code will output 1, "truexyz", 2, 1. Here's a general guideline for addition operators:
+
+
+Number + Number -> Addition
+Boolean + Number -> Addition
+Boolean + Number -> Addition
+Number + String -> Concatenation
+String + Boolean -> Concatenation
+String + String -> Concatenation
+Question 15
+What will be the output of the code below?
+var z = 1, y = z = typeof y;
+console.log(y); 
+The output would be undefined. According to the associativity rule, operators with the same precedence are processed based on the associativity property of the operator. Here, the associativity of the assignment operator is Right to Left, so typeof y will evaluate first , which is undefined. It will be assigned to z, and then y would be assigned the value of z and then z would be assigned the value 1.
+
+
+Question 16
+What will be the output of the code below?
+// NFE (Named Function Expression
+var foo = function bar(){ return 12; };
+typeof bar(); 
+The output would be Reference Error. To make the code above work, you can re-write it as follows:
+
+
+Sample 1
+
+
+var bar = function(){ return 12; };
+typeof bar(); 
+or
+
+
+Sample 2
+
+
+function bar(){ return 12; };
+typeof bar(); 
+A function definition can have only one reference variable as its function name. In sample 1, bar's reference variable points to anonymous function. In sample 2, the function's definition is the name function.
+
+
+var foo = function bar(){
+    // foo is visible here
+    // bar is visible here
+console.log(typeof bar()); // Work here :)
+};
+// foo is visible here
+// bar is undefined here
+ 
+Question 17
+What is the difference between the function declarations below?
+var foo = function(){
+  // Some code
+};
+  function bar(){
+  // Some code
+};
+The main difference is the function foo is defined at run-time whereas function bar is defined at parse time. To understand this in better way, let's take a look at the code below:
+
+
+Run-Time function declaration
+<script>
+foo(); // Calling foo function here will give an Error
+var foo = function(){
+    console.log("Hi I am inside Foo");
+};
+</script>
+<script>
+Parse-Time function declaration
+bar(); // Calling foo function will not give an Error
+function bar(){
+  console.log("Hi I am inside Foo");
+};
+</>
+
+
+var a--> declaration
+
+
+a=10;
+-> intialisation ,assignment, defination
+
+
+In JavaScript, a function defined inside another one has access to the outer function's variables. Therefore, a function is a first-class object that can be returned by other functions as well and be passed as an argument in another function.
+
+
+A function is an instance of the Object type
+A function can have properties and has a link back to its constructor method
+A function can be stored as a variable
+A function can be pass as a parameter to another function
+A function can be returned from another function
+
+
+
+
+The function .call() and .apply() are very similar in their usage except a little difference. .call() is used when the number of the function’s arguments are known to the programmer, as they have to be mentioned as arguments in the call statement. On the other hand, .apply() is used when the number is not known. The function .apply() expects the argument to be an array.
+
+
+The basic difference between .call() and .apply() is in the way arguments are passed to the function. Their usage can be illustrated by the given example.
+
+
+JavaScript
+
+
+var someObject = {
+
+
+myProperty : 'Foo',
+
+
+myMethod : function(prefix, postfix) {
+
+
+alert(prefix + this.myProperty + postfix);
+
+
+}
+
+
+};
+
+
+someObject.myMethod('<', '>'); // alerts '<Foo>'
+
+
+var someOtherObject  = {
+
+
+myProperty : 'Bar'
+
+
+};
+
+
+someObject.myMethod.call(someOtherObject, '<', '>'); // alerts '<Bar>'
+
+
+someObject.myMethod.apply(someOtherObject, ['<', '>']); // alerts '<Bar>'
+
+var someObject = {
+
+
+myProperty : 'Foo',
+
+
+myMethod : function(prefix, postfix) {
+
+
+alert(prefix + this.myProperty + postfix);
+
+
+}
+
+
+};
+
+
+someObject.myMethod('<', '>'); // alerts '<Foo>'
+
+
+var someOtherObject  = {
+
+
+myProperty : 'Bar'
+
+
+};
+
+
+someObject.myMethod.call(someOtherObject, '<', '>'); // alerts '<Bar>'
+
+
+someObject.myMethod.apply(someOtherObject, ['<', '>']); // alerts '<Bar>'
+
+
+
+
+https://www.javascript.com/learn/javascript/strings
+
+
+you can use a backslash \ to escape the quotation marks. This lets JavaScript know in advance that you want to use a special character.
+
+
+'It\'s six o\'clock.';
+"Remember to say \"please\" and \"thank you.\"";
+
+
+A string’s trim method returns a copy of the string with beginning and ending whitespace characters removed.
+
+
+
+
+https://www.tutorialspoint.com/javascript/javascript_interview_questions.htm
+
+
+javascript
+
+
+use ---validation ---interaction
+pros --no read and write of files
+         --no support for networking
+          -- no multi threading and mutliprocessing capabilites
+
+
+-- case sensitive
+
+
+
+
+https://www.npmjs.com/package/grunt-debug-task
+
+
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+
+ProxyPass /wtrui-web http://10.10.2.2:7231/wtrui-web
+ProxyPassReverse /wtrui-web http://10.10.2.2:7231/wtrui-web
+
+
+ProxyPass /baggage http://10.10.2.2:7231/baggage
+ProxyPassReverse /baggage http://10.10.2.2:7231/baggage
+
+
+
+
+https://zoompf.com/blog/2012/05/html5shiv-and-serving-content-from-code-repositories
+
+
+html5shiv is a JavaScript library that enables Internet Explorer 8 and earlier to understand and properly render new HTML5 tags like <article> or <aside>. This is incredibly helpful because it allows websites to use these new semantic elements while retaining backwards compatibility. While html5shiv is open source and free to be copied and used anywhere, websites often link to a specific URL: http://html5shiv.googlecode.com/svn/trunk/html5.js
+
+
+<!--[if lt IE 9]>
+     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+
+html5shiv.googlecode.com is not properly configured and does not serve JavaScript files using HTTP compression. Reducing the size of content is a well known category of performance optimization and HTTP compression is an easy way to accomplish
+this.
+
+
+It’s Not Cached.
+
+
+
+
+https://zoompf.com/blog/2013/04/top-5-causes
+
+
+5 Common Causes of Slow Website Performance
+ Mark Isham on April 22, 2013. Category: Alexa Research
+One of the benefits of working in the website performance industry is the treasure trove of interesting data just sitting out there in the public domain. Over the last few days we aimed our website performance scanner at the Alexa Top 1000 websites to gather various performance metrics of interest. In this post we’d like to highlight the top 5 most common high impact performance causes we uncovered in those scans.
+
+
+Our testing methodology was simple: for each site in the Alexa top 1000 list, we performed a homepage analysis using the Zoompf WPO product, recording the # of issues found for each of the 400 performance best practices we analyze. A distinct count of each issue type was then summed up across all 1000 sites and ranked in the order of decreasing frequency as discussed below.
+
+
+1. Unoptimized Images
+Sites impacted: 90%
+
+
+Unoptimized images were the clear winner, impacting 90% of the Alexa Top 1000.  In this context, we refer to unoptimized images as any image that can be reduced in size without visual impact to your user, also known as “lossless” optimization. Images that are optimized using lossless methods are visually identical to their original images, just stripped of extraneous metadata that helps describe the image (useful to the designer, not needed for the end user).
+
+
+A few best practices to consider:
+
+
+PNG image files are often needlessly large. This is due to extra data inside the PNG file such as comments or unused palette entries as well as the use of an inefficient DEFLATE compressor. PNG images can be optimized using free tools like pngcrush that reduce the size of the file without changing or reducing the image quality.
+JPEG image files can also be needlessly large for similar reasons to PNG. By using free tools such as jpegtran  you can convert JPEGs into progressively rendered JPEG files to reduce the size of the file without losing image quality.
+PNG files are best used for icons and logos while JPEG is preferable for photos. Because PNG images support transparency while JPEGs do not, the PNG format is commonly overused for images that are better served as JPEGs. By utilizing JPEG instead, you often can realize file size savings as large as 80%. If possible, consider reworking your design to avoid the use of transparency. Alternatively, you can often append a smaller transparent PNG image alongside the larger JPEG image to achieve the same visual effect at substantial file size savings
+For GIF images, check out our earlier blog post on Optimizing GIF Images.
+ For more information about image optimization, check out this presentation as well.
+
+
+2. Content Served Without HTTP Compression
+Sites impacted: 72%
+
+
+Enabling HTTP compression on your webserver can dramatically reduce the size of the downloaded page, significantly improving load time. This is a high impact change, but is not always as easy as it may seem. We actually did a dedicated blog post on this topic over a year ago here, so i’ll defer most of the details to that.
+
+
+For Apache 2.0 and above, load the mod_deflate module to enable compression. For IIS, check out this page for more information.
+
+
+3. Combinable CSS Images
+Sites impacted: 69%
+
+
+Browsers make an individual HTTP request for every background image specified in your CSS pages. It is not uncommon for over half of your total HTTP requests from a single web page to be used for loading background CSS images. By combining related images into a small number of CSS sprites, you can significantly reduce the number of HTTP requests made during your page load. More information on CSS Sprites can be found here.
+
+
+4. Images Without Caching Information
+Sites impacted: 65%
+
+
+HTTP Caching allows the browser to store a copy of an image for a period of time, preventing the browser from reloading the same image on subsequent page loads and thus dramatically increasing performance. To cache your images, update your webserver configuration to provide an Expires header to your image responses from the server. For images that do not change often, you should specify a “far future” Expires header, typically a date 6 months to a year out from the current date.
+
+
+Note that even with a far future Expires date, you can always change the image later by modifying the referenced filename using versioning, for example MyImage.png becomes MyImage_v2.png. For more information, see revving filenames.
+
+
+5. Domain Sharding Not Implemented
+Sites impacted: 64%
+
+
+Most browsers typically support 2-4 concurrent downloads of static resources for each hostname. Therefore, if your page is loading many static resources from the same hostname, the browser will bottleneck in a stair-step fashion downloading all the content. By splitting resources across 2 different domains, you can effectively double browser throughput downloading the required links.
+
+
+Note that it may be administratively difficult to physically move your files to different hostnames, so as a clever “trick” you can utilize DNS CNAME records to map different hostnames to the same origin. For example, static1.example.com and static2.example.com could both map to static.example.com, thus prompting the browser to load twice as many links concurrently as before, without requiring you physically move the files on the server. For more information see Maximizing Parallel Downloads in the Carpool Lane
+
+
+Of course too much concurrency has its own drawbacks on performance, so testing should be done to find the optimal balance.
+
+
+Want to see if your website has these problems? Try a free performance scan to learn more about these and 395 other performance best practices.
+
+
+
+
+https://zoompf.com/blog/2010/01/should-you-use-javascript-library-cdns
+
+
+Should You Use JavaScript Library CDNs?
+ Billy Hoffman on January 15, 2010. Category: Uncategorized
+The concept is simple. Hundreds of thousands of websites use JavaScript libraries like jQuery or Prototype. Different websites you visit each download another identical copy of these libraries. You probably have a few dozen copies of jQuery in your browser’s cache right now. That’s silly. We should fix that.
+
+
+How? Well, if there was a 3rd party repository of common JavaScript libraries, websites could simply load their JavaScript files from them. Now imagine the repository implemented caching. SiteA, SiteB, and SiteC all have <SCRIPT SRC> tags that reference http://some-code-respo.com/javascript/jquery.js. When someone visits any one of these sites, the JavaScript library jQuery is downloaded and cached. If that same person visits one of the other sites, that person will not have to re-download jQuery again. The idea is that sites will load faster because these libraries should not have to be re-downloaded very often at all. Of course, this only works if a lot of people all use the common repository. If only a few people use the common repository, then virtually no one benefits because the library will not have been downloaded and cached by a previous website and has to be re-downloaded.
+
+
+This is an example of the Network effect. The more people that use a system the more valuable the system becomes.
+
+
+Implementations of this idea of a central shared repository of common JavaScript libraries are called several different things. Google calls their implementation Google AJAX Library API. Yahoo doesn’t have a clear name for their implementation. I’ve seen “Free YUI hosting” or “YUI Dependencies”, or even Yahoo YUI CDN. Microsoft calls their implementation the Microsoft AJAX CDN. To keep things simple, I will collectively refer to these repositories of common JavaScript libraries as JavaScript Library CDNs.
+
+
+JavaScript Library CDNs seem like a performance no brainer. Use the service, your site loads faster and consumes less bandwidth. This post will explore if and under what conditions does a JavaScript Library CDN actually improve web performance.
+
+
+The Choice
+Consider this situation. You are speed conscious web developer. You have a website that uses jQuery 1.3.2 as well as some additional site specific JavaScript. Because you value web performance, you know you should concatenate all your JavaScript files into as few files as possible, minify them, and serve them using gzip compression. You have 2 choices:
+
+
+Serve all your JavaScript locally. You will have a single <SCRIPT SRC> tag that points to a JavaScript file containing jQuery 1.3.2 and your site specific JavaScript.
+Serve some of the JavaScript using a JavaScript Library CDN. You will have 2 <SCRIPT SCR> tags. The first tag will point to a single file on your website containing your site specific JavaScript files. The second tag will point to the copy of jQuery 1.3.2 on Google AJAX Library API.
+What’s the difference? Well a minified, gipped copy of jQuery 1.3.2 is 19,763 bytes in length. If you choose option 1 all your users will have to download these 19,763 bytes regardless of what other sites they may have already visited. That’s the cost: downloading 19,763 bytes. Notice there is no cost of an additional HTTP request and response or other overhead because those bytes of jQuery content are included inside the response for the site specific JavaScript content which the visitor already has to make. This is important, so I will repeat: The cost of not using a JavaScript Library CDN is only the downloading of JavaScript content and not any additional HTTP requests or overhead.
+
+
+In the second option, you are going to gamble with a JavaScript Library CDN. You are hoping a visitor has already browsed another website which also uses Google to serve jQuery 1.3.2. If you are right, then that visitor does not need to download 19,763 bytes. If you wrong, the visitor needs to download 19,763 bytes from Google. That’s the prize in a nutshell. And downloading 19,763 bytes doesn’t sound bad! Who cares where it comes from?
+
+
+The Price of Missing
+Unfortunately an HTTP request to Google’s JavaScript Library CDN is more expensive than an HTTP request to your own website! This is because a visitor’s browser has to perform a DNS lookup for ajax.googleapis.com and establish a new TCP connection with Google’s systems. If the additional request was to your site instead the visitor’s browser would not need to make another DNS lookup and the HTTP request would be sent over an existing HTTP connection.
+
+
+Unfortunately this is a stubborn process. DNS lookups and establishing TCP connections involve a few number of very small packets. Having a faster Internet connection will not significantly impact the speed of these operations. Two different runs on WebPageTest showed that it takes 1/3 of a second for a web browser to make a connection to Google’s JavaScript Library CDN and start downloading it. (And remember, these are CDNs so where I make the request from should not matter as the CDN makes sure I’m downloading the content from a web server that is geographically near me.)
+
+
+Let me repeat that: Using Google’s JavaScript Library CDN comes with a 1/3 of a second tax on missing. (Note that a tax like this applies to opening connections to a any new host: JavaScript Library CDNs, advertisers, analytics and visitor tracking, etc. This is why you should try to reduce the number of different hostnames you serve content from.) Even if this number is smaller for other users, say, 100 milliseconds, it is still a tax that is paid for using a JavaScript Library CDN and missing.
+
+
+It gets worse because downloading a file over a new TCP connection with Google is slower than downloading a file over an existing TCP connection with your website! This is due to TCP’s slow start and congestion control. Newly created connections transmit data slower than existing connections do. (This is why persistent connections are so important!)
+
+
+The Odds of Winning
+Since JavaScript Library CDNs utilize the Network Effort, they are only valuable if a large number of websites use them. After all, the only way your visitors can “win” in the JavaScript Library CDN gamble is if they have already been to a site that also uses the same CDN. So, how many people actually use Google?
+
+
+Well, according to the great folks at BuiltWith, only 13% of all websites use some kind of 3rd party CDN. Of those websites using a CDN, 25.56% of them are using Google’s Ajax Library API. So only 3.89% of all websites surveyed are using Google’s AJAX Library API.
+
+
+I wanted to gather more data than BuiltWith. I also didn’t like that way they grouped Traditional CDNs (like Akamai) with JavaScript Library CDNs (like Google) with private site-specific CDNs (like Turner’s CDN). So I performed my own survey. I visited the top 2000 sites on Alexa and analyzed each one to see who is using Google’s JavaScript Library CDN. The result? Only 69 sites out of 2000, or 3.45%, are using Google’s JavaScript Library CDN. My data is on track with BuiltWith’s data which is good.
+
+
+Unfortunately you do not vaguely or abstractly “use a JavaScript Library CDN.” You reference a specific URL for the specific JavaScript Library and version number. You only get a benefit from the CDN if you referencing the specific URL that other websites are referencing. So we have to dig deeper and see what versions of what JavaScript libraries are in use. Below is the a table of JavaScript libraries that Alexa Top 2000 sites use served by Google’s AJAX Library API.
+
+
+JavaScript Library Number of Alexa Top 2000
+sites serving the library
+from Google’s CDN
+jQuery 48
+Prototype 6
+SWFObject 6
+YUI 6
+jQuery UI 4
+Script.aculo.us 3
+MooTools 3
+Dojo 1
+We see that 48 sites are using Google’s JavaScript Library CDN to serve jQuery, and of those 36 sites are using jQuery 1.3.2. That means jQuery 1.3.2 is used by 1.8% of the Alexa 2000 websites. SWFObject and Prototype came in next at 6 sites each, or less than 0.334% of the sites. When you factor in version numbers, their penetration drops to around 0.10%.
+
+
+So what is the best case here? What are the odds that someone would have jQuery 1.3.2 served from Google’s JavaScript Library CDN sitting in their browser cache? If I have clear browser cache, and I visit 35 randomly selected websites from the Alexa top 2000, and then I visit your site, there is only a 47% chance that I will have a cached copy of jQuery 1.3.2 ready for you to use. You calculate this by first determining the probably of randomly picking 35 websites that don’t have jQuery 1.3.2 and subtracting 1. The formula is: 1 – ( (1 – .018) ^ 35 ).
+
+
+Those are not very good odds. And they only are applicable if you are using jQuery 1.3.2. Anything else is not practical. You also should consider the makeup of the sites on the list. I have probably only visited 30 or so of the websites listed in the Alexa top 2000 list ever and I probably only visit 5-10 with any regularity. We have determined that the odds of “winning” in the CDN gamble are fairly small. How small the odds are will depend on your site content and your visitors. However I think it is safe to say, as of January 2010, the majority of your users will not have visited a site that uses a JavaScipt Library CDN for the JavaScript library that you use.
+
+
+Getting More Data
+So maybe the odds aren’t good. But is it still worth it to potentially help some people?
+
+
+Let’s go back to our hypothetical situation where we are deciding if we should use a JavaScript CDN or not. Consider someone with 768 kilobyte per second Internet connection where 768 * 1024= 786,432 bits downloaded per second. Let’s say it is operating at only 80% efficiency to account for overhead like IP, TCP, congestion, packet loss, etc. That 629,145 bits downloaded per second, gives us 78,643 bytes downloaded per second or 26,214 bytes downloaded in 1/3 of a second. A minified and gzipped copy of jQuery 1.3.2 is 19,763 bytes long. This means anyone using a 768 kbps internet connection can download the contents of jQuery 1.3.2 in 1/3 of a second. In other words, downloading jQuery 1.3.2 on that connection takes the same amount of time as simply connecting to Google’s JavaScript Library CDN.
+
+
+This simplifies the decision in our hypothetical situation on where to host jQuery. In the locally hosted option, we are asking our visitors to download some amount of content X. X is all our HTML, images, site specific JavaScript, and includes the 19,763 bytes of jQuery 1.3.2. In the “use a CDN” option, we still have X amount of content. The only difference is the CDN has the 19,763 bytes of jQuery and our site has X – 19,763 bytes of content. If a visitor does not have cached copy of JavaScript Library they still download a total of X amount of content. It is served from our website and from Google. Under these conditions we are led to the following points:
+
+
+If you are using a CDN and the visitor does not have cached copy, they download the site 1/3 of a second slower than if they had downloaded all the content from your web server.
+If you are using a CDN and the visitor does have cached copy, they download all of the content 1/3 of a second faster than if they had downloaded all the content from your web server.
+Or, more simply: If we use Google’s JavaScript Library CDN, we are asking the majority of our website visitors (who don’t have jQuery already cached) to take a 1/3 of a second penalty (the time to connection to Google’s CDN) to potentially save a minority of our website visitors (those who do have a cached copy of jQuery) 1/3 of a second (the length of time to download jQuery 1.3.2 over a 768kps connection).
+
+
+That does not make sense. It makes even less sense as the download speed of your visitors increases. Try to avoid serving 20 or 30 kilobytes of content at the cost of using a 3rd party just doesn’t make sense.
+
+
+Conclusions
+JavaScript Library CDNs use the network effect. Our survey of the Alexa 2000 shows that right now there are too few people in the network to get any value. Only Google’s AJAX Library API has anywhere near the penetration to provide any benefit and only if you are using a specific version of a single JavaScript library. Even in that remote case, serving jQuery 1.3.2 using Google will slow down the majority of your users at the expense of a possibly nonexistent minority. Zoompf recommends the vast majority of websites avoid using JavaScript Library CDNs until they gain more market penetration.
+
+
+I will discuss the very select group of sites that should use CDNs, as well as some other interesting data discovered while surveying the Alexa 2000 in posts early next week.
+
+
+Want to see what performance problems you have? Using JavaScript Library CDNs appropriately are just a few of the 200+ performance issues Zoompf detects while assessing your web applications for performance. You can sign up for a free mini web performance assessment at Zoompf.com today!
+
+
+
+
+<!DOCTYPE html>
+<html ng-app="noteApp">
+
+
+<head>
+  <meta charset="utf-8" />
+  <title>AngularJS Plunker</title>
+  <!-- <script>
+    document.write('<base href="' + document.location + '" />');
+  </script> -->
+  <!-- <link rel="stylesheet" href="style.css" /> -->
+  <!-- <script data-require="jquery@*" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script> -->
+  <script data-require="angular.js@1.0.x" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" data-semver="1.0.8"></script>
+
+
+</head>
+
+
+<body>
+
+
+  <form>
+    First name:<br>
+    <input type="text" name="firstname" ng-model="firstname" value="Mickey"  id="firstname">
+    <br>
+    Last name:<br>
+    <input type="text" name="lastname" ng-model="lastname" value="Mouse" id="lastname">
+    <br><br>
+      CLASS:<br>
+    <input type="text" name="class" ng-model="class" value="class" id="class">
+    <br><br>
+      AGE:<br>
+    <input type="text" name="age" ng-model="age" value="age" id="age">
+    <br><br>
+        <button type="button" name="button"  notepad1="dummy">click me</button>
+  </form>
+
+
+
+
+<script>
+var app = angular.module('noteApp', []);
+
+
+app.directive("notepad", function() {  return {
+      restrict: "A",
+      compile: function(scope, ele, attr) {
+          return {
+              post: function postLink(scope, ele, attr) {
+
+
+                console.log("sdf");
+
+
+                ele.bind('click', function(scope, elem, attrs) {
+                  scope.srcElement.parentElement.getElementsByTagName('input')[2].focus();
+                  console.log("dagasdfgs");
+                });
+              }
+          }
+      }
+  }});
+  app.directive("notepad1", function() {
+  return {
+      restrict: "A",
+   link: function ($scope, ele, attrs, ngModel,$rootScope) {
+   console.log("asdf");
+
+
+           /*     var destroyScope = function(){
+                       //$scope = null;
+                       ele.off("blur");
+                       ele.empty();
+                       ele.remove();
+                }
+                  $scope.$on("$destroy",destroyScope);
+               var x = true;
+*/
+
+
+        //         ele.on('click', function () {
+// console.log("jkhji")
+// });
+        var a=ele;
+ele.bind('click',function(elem,a){
+
+  alert("sdfgsdfg");})
+
+}
+
+
+  }
+
+
+  });
+</script>
+</body>
+
+
+</html>
+
+
+
+
+http://stackoverflow.com/questions/19224028/add-directives-from-directive-in-angularjs
+
+
+<!DOCTYPE html>
+<html>
+<script data-require="angular.js@1.0.x" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" data-semver="1.0.8"></script>
+<body ng-app="myApp">
+
+
+<first-directive></first-directive>
+
+
+<script>
+var app = angular.module("myApp", []);
+app.directive("firstDirective", function($compile) {
+    return {
+       template : '<h1>This is first directive!</h1> <br / ><br / ><button type="button" ng-click="firstCtrl()">Click Me to second directive!</button> <div id="insertSecond"></div> ',
+        controller: function ($scope) {
+              $scope.firstCtrl = function() {
+                    var ele = $compile('<second-directive></second-directive>')($scope);
+                    angular.element(document.querySelector('#insertSecond')).append(ele);
+              }
+        },
+        restrict: "EAC"
+
+
+    }
+});
+
+
+app.directive("secondDirective", function() {
+    return {
+       template : '<h1>This is second directive!</h1> <br / ><br / >',
+        controller: function ($scope) {
+
+
+        },
+          restrict: "EAC"
+    }
+});
+</script>
+</body>
+</html>
+
+
+
+
+https://www.google.co.in/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#safe=active&q=inject+one+directive+into+diretcive
+
+
+<!DOCTYPE html>
+<html ng-app="noteApp">
+
+
+<head>
+  <meta charset="utf-8" />
+  <title>AngularJS Plunker</title>
+  <!-- <script>
+    document.write('<base href="' + document.location + '" />');
+  </script> -->
+  <!-- <link rel="stylesheet" href="style.css" /> -->
+  <!-- <script data-require="jquery@*" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script> -->
+  <script data-require="angular.js@1.0.x" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" data-semver="1.0.8"></script>
+
+
+</head>
+
+
+<body>
+
+
+  <form>
+    First name:<br>
+    <input type="text" name="firstname" ng-model="firstname" value="Mickey"  id="firstname">
+    <br>
+    Last name:<br>
+    <input type="text" name="lastname" ng-model="lastname" value="Mouse" id="lastname">
+    <br><br>
+      CLASS:<br>
+    <input type="text" name="class" ng-model="class" value="class" id="class">
+    <br><br>
+      AGE:<br>
+    <input type="text" name="age" ng-model="age" value="age" id="age">
+    <br><br>
+        <button type="button" name="button"  notepad1="dummy">click me</button>
+  </form>
+
+
+<script>
+var app = angular.module('noteApp', []);
+
+
+app.directive("notepad", function() {  return {
+      restrict: "A",
+      compile: function(scope, ele, attr) {
+          return {
+              post: function postLink(scope, ele, attr) {
+
+
+                console.log("sdf");
+
+
+                ele.bind('click', function(scope, elem, attrs) {
+                  scope.srcElement.parentElement.getElementsByTagName('input')[2].focus();
+                  console.log("dagasdfgs");
+                });
+              }
+          }
+      }
+  }});
+  app.directive("notepad1", function() {
+  return {
+      restrict: "A",
+   link: function ($scope, ele, attrs, ngModel,$rootScope) {
+   console.log("asdf");
+
+
+           /*     var destroyScope = function(){
+                       //$scope = null;
+                       ele.off("blur");
+                       ele.empty();
+                       ele.remove();
+                }
+                  $scope.$on("$destroy",destroyScope);
+               var x = true;
+
+
+                ele.on('click', function () {
+console.log("jkhji")
+});
+
+
+*/
+
+
+}
+
+
+  }
+
+
+  });
+</script>
+</body>
+
+
+</html>
+
+
+
+
+http://localhost:9000/#/landingPage/forwardOnHandBag
+
+
+.directive("addMore", function(dataService, $timeout) {
+            return {
+                restrict: "C",
+                scope: false,
+
+
+                link: function(scope, elem, attrs) {
+
+
+                    elem.bind('click', function() {
+                        var src = elem.find('img').attr('src');
+
+
+                        // call your SmoothZoom here
+                        angular.element(attrs.options).css({
+                            'background-image': 'url(' + scope.item.src + ')'
+                        });
+                    });
+                    console.log("hi");
+
+
+                }
+            }
+        });
+
+
+
+
+http://stackoverflow.com/questions/4175008/how-can-i-include-all-javascript-files-in-a-directory-via-javascript-file
+
+
+function loadScripts(){
+   var directory = 'script/';
+   var extension = '.js';
+   var files = ['model', 'view', 'controller']; 
+   for (var file of files){
+       var path = directory + file + extension;
+       var script = document.createElement("script");
+       script.src = path;
+       document.body.appendChild(script);
+   }
+}
+
+
+
+
+(?!00)([0-2]{1}[0-9]{1}|[3][0-1])\s(Jan|Feb|Mar)\s[2]([0-9]){3}
+
+
+
+
+http://xahlee.info/js/css_units.html
+
+
+Relative units → a length relative to some element's length. (for example, with respect to inherited value or browser default).
+
+
+5rem
+5em
+5ex
+5ch
+5%
+
+
+The default font size in browsers is 16px. That is, by default, 1rem is 16px.
+
+
+Absolute units → fixed in relation to each other.
+
+
+1cm
+10mm
+2.54cm
+1in
+72pt
+6pc
+96px
+There are 2 types of absolute units.
+
+
+① “physical” units {in, cm, mm, pt, pc}.
+② px
+
+
+em~1/2ex~1/2 ch
+
+
+Relative Units
+
+
+unit meaning
+em Length equal to the current font size. (see detail below) (Note: it is NOT the width of “M”.)
+ex A font's “x-height”, usually the height of the letter x. Typically about half of em.
+rem (CSS3) Length equal to the computed value of font-size on the root element. When specified on the font-size property of the root element, the rem units refer to the property's initial value.
+ch (CSS3) Length roughly equal to the width of the 0 (ZERO) character in the current font. Roughly half of em.
+The length of em is:
+
+
+em unit is equal to the computed value of the font-size property of the element on which it is used.
+when em occurs in the value of the font-size property itself, it refers to the font size of the parent element.
+When specified for the root of the document tree (For example, <html>), em and ex refer to the property's initial value.
+Note: Child elements do not inherit the relative values specified for their parent; they inherit the computed values.
+
+
+
+
+http://xahlee.info/js/css_transition.html
+
+
+<div id="tran92623">mouse hover over me</div>
+Here's CSS code:
+
+
+#tran92623 {
+display: table;
+border:solid thick red;
+
+
+transition: width 2s; /* ← do transition for property “width”, duration 2 secs */
+width: 60%;           /* ← begin witdth*/
+}
+
+
+#tran92623:hover {
+width: 30%;            /* ← end width */
+}
+
+
+Multiple Transitions
+
+
+You can specify transition for multiple CSS properties. Example:
+
+
+Hover
+Me
+Here's the CSS code:
+
+
+#mtran52461 {
+display:table;
+border:solid thick red;
+padding:1ex;
+text-align:center;
+
+
+width:40px;
+height:40px;
+border-radius:0;
+box-shadow:0 0 black;
+
+
+transition:width 1s, height 1s, border-radius 1s, box-shadow 1s;
+}
+
+
+#mtran52461:hover {
+width:100px;
+height:100px;
+border-radius:4ex;
+box-shadow:5ex 5ex 5ex gray;
+}
+
+
+e syntax is several attributes separated by comma, like this:
+
+
+… {transition: width 1s, height 1s, border-radius 1s, box-shadow 1s;}
+
+
+CSS Transition Full Syntax
+
+
+Here's the full syntax.
+
+
+transition: spec_1, spec_2, spec_3, …
+
+
+Each of the spec can have this form:
+
+
+css_property_name duration timing_function delay
+
+
+duration is a time spec, for example 3s means 3 seconds. If you want to use 0 second, you must write 0s not just 0.
+timing_function controls how the values change over time. Some predefined values you can use are: {ease, ease-in, ease-out, ease-in-out, linear, step-start, step-end, steps(integer, start),steps(integer, end), cubic-bezier(number, number, number, number)}. The default is ease.
+delay time before the transition begin. For example, 0.5s for 0.5 second.
+
+
+Transition Timing Function
+
+
+timing_function controls how the value changes over time.
+
+
+pre-defined values you can use are:
+
+
+ease
+ease-in
+ease-out
+ease-in-out
+linear
+step-start
+step-end
+steps(integer, start)
+steps(integer, end)
+cubic-bezier(number, number, number, number)
+The default is ease.
+
+
+CSS transition and animation?
+CSS animation allows one to control every frame of animation. That is, for potentially every frame, you specify the exact CSS properties. 〔➤see CSS: Animation Tutorial〕
+
+
+CSS transition just jump between 2 CSS values, in a smooth and automatic way.
+
+
+Transition is activated when a CSS property's (computed) value changes. Currently, the only practical way to start a transition is the pseudo element :hover
+
+
+
+
+http://xahlee.info/js/css_image_sprites.html
+
+
+CSS Sprite Example
+
+
+.flameicon {
+width:17px;
+height:22px;
+background-image: url(i/Google_Plus_css_sprites.png);
+background-position: -18px -20px;
+}
+
+
+
+
+http://xahlee.info/js/css_text_shadow.html
+
+
+CSS syntax: text-shadow: x-offset y-offset color
+
+
+simple shadow
+div {
+text-shadow: 0.2ex 0.2ex red;
+}
+
+
+the ex above is a CSS unit meaning the height of letter “x”
+
+
+text-shadow: x-offset y-offset fuzziness color
+
+
+fuzzy shadow
+div {
+text-shadow: 0.2ex 0.2ex 0.2ex red;
+}
+Multiple Shadows
+
+
+You can also specify multiple shadows.
+
+
+multi shadow
+p {
+text-shadow:
+-.2ex -.2ex 0.2ex green,
+0.2ex 0.2ex 0.2ex red;
+}
+Glow Effect
+
+
+The trick is to specify no shadow offset, but with big value of fuzziness.
+
+
+div {
+text-shadow: 0 0 .1ex cyan;
+background-color:black;
+}
+
+
+Outline Effect
+
+
+The trick for outline font is specify shadow for all 8 directions {top, bottom, left, right, top right, top left, bottom right, bottom left} with minimal offset, and with big value of fuzziness.
+
+
+outline 𝔒𝔘𝔗𝔏ℑ𝔑𝔈 𝔬𝔲𝔱𝔩𝔦𝔫𝔢
+div {
+color:white;
+text-shadow:
+  0.1px   0.0px   1px black,
+  0       0.1px   1px black,
+-0.1px   0.0px   1px black,
+  0      -0.1px   1px black,
+  0.1px   0.1px   1px black,
+-0.1px  -0.1px   1px black,
+-0.1px   0.1px   1px black,
+  0.1px  -0.1px   1px black;
+font-size:4ex;
+}
+
+
+
+
+http://xahlee.info/js/css_box_shadow.html
+
+
+Box Shadow with Blur
+
+
+Following are boxes with increasing blur value (in pixels).
+
+
+div {box-shadow:3px 3px ‹blur›px red}
+
+
+Box Shadow with Spread
+
+
+Following are boxes with increasing spread value (in pixels).
+
+
+div {box-shadow:5px 5px 0px ‹spread›px red}
+
+
+multiple Shadow with Inset
+
+
+div {
+width:100px;height:70px;
+padding:1ex;
+box-shadow:
+inset 0px 0px 4px 3px red,
+      0px 0px 4px 3px red;
+}
+
+
+div {
+display:table;
+border-radius:9px;
+padding:0.5ex;
+margin:5ex;
+box-shadow:
+8px  6px  13px  8px hsl(1, 100%, 50%),
+-16px 12px 20px 16px hsl(60, 100%, 50%),
+48px 36px 71px 28px hsl(180, 100%, 50%);
+}
+
+
+div {
+display:table;
+padding:0.5ex;
+margin:5ex;
+
+
+box-shadow:
+8px  6px  3px  8px hsl(30, 100%, 50%),
+16px 12px  6px 16px hsl(60, 100%, 50%),
+24px 18px  9px 24px hsl(90, 100%, 50%),
+32px 24px 12px 32px hsl(120, 100%, 50%),
+40px 30px 15px 40px hsl(150, 100%, 50%),
+48px 36px 18px 48px hsl(180, 100%, 50%),
+56px 42px 21px 56px hsl(210, 100%, 50%),
+64px 48px 24px 64px hsl(240, 100%, 50%),
+72px 54px 27px 72px hsl(270, 100%, 50%),
+80px 60px 30px 80px hsl(300, 100%, 50%),
+88px 66px 33px 88px hsl(330, 100%, 50%),
+96px 72px 36px 96px hsl(360, 100%, 50%);
+}
+
+
+
+
+http://xahlee.info/js/css_round_corners.html
+
+
+CSS3 to make round corners. You can do that with the border-radius attribute.
+
+
+div {
+width:100px; height:100px;
+border:solid thin black;
+border-radius:10px;
+}
+
+
+border-radius:top_left top_right bottom_right bottom_left
+
+
+For each border radius value, it can be a fraction, like this: border-radius:50px/10px 0 0 0. The 50px specifies the horizontal radius of a Ellipse, the 10px is the vertical radius
+
+
+
+
+http://xahlee.info/js/css_color_opacity.html
+
+
+css_selector {background-color:hsla(hue, saturation, lightness, opacity)}
+
+
+or
+
+
+css_selector {background-color:rgba(red, green, blue, opacity)}
+
+
+0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+
+
+
+http://xahlee.info/js/css_gradient_radial.html
+
+
+div.rg77348 {
+background: radial-gradient(yellow, green);
+width:150px;height:150px; border:solid thin black;
+}
+
+
+div {background: radial-gradient(ellipse at right bottom, red, green, blue, white);}
+
+
+div {background: radial-gradient(yellow 10%, green 20%, blue, white);}
+
+
+
+
+http://xahlee.info/js/css_gradient.html
+
+
+div { background: linear-gradient(90deg, red, yellow); }
+0deg means the gradient line points upward. Positive values are clock-wise. So, 90deg means pointing to the right.
+
+
+background: linear-gradient(90deg, yellow, red 80%, green, blue, white);
+
+
+background: linear-gradient(90deg, yellow, red 100px, green 200px , blue 300px, white);
+
+
+background: -webkit-linear-gradient(0deg, yellow, red);
+background: -moz-linear-gradient(0deg, yellow, red);
+background: -o-linear-gradient(0deg, yellow, red);
+background: -ms-linear-gradient(0deg, yellow, red);
+
+
+
+
+http://xahlee.info/js/css_selector_syntax.html
+
+
+* any element.
+tag any tag element.
+t1>t2 any t2 element that is a direct child (first-level nesting) of t1.
+t1 t2 any t2 element that is nested (any level) inside t1.
+t1+t2 any t2 element immediately preceded by element t1. (t1 and t2 are siblings, with t1 coming first.)
+
+
+tag:first-child same as tag:nth-child(1).
+★ tag:nth-child(n) nth child element that is tag. (counting start at 1. Cannot be negative.)
+★ tag:nth-last-child(n) counting from bottom, starting at 1.
+★ tag:last-child same as tag:nth-last-child(1)
+
+
+★ tag:nth-of-type(n) element tag that is nth child of the same name. Count starts at 1.
+★ tag:nth-last-of-type(n) Same as tag:nth-of-type(n) but counting from bottom.
+★ tag:first-of-type Same as tag:nth-of-type(1)
+★ tag:last-of-type Same as tag:first-of-type but the last.
+★ tag:only-of-type
+
+
+★ tag:root element tag that is root of document.
+★ tag:only-child element tag if it's the only child.
+★ tag:empty element tag that has no children (including text nodes)
+★ tag:target element tag that is the target of the referring URI.
+★ tag:enabled a user interface element tag that is enabled.
+★ tag:disabled a user interface element tag that is disabled
+★ tag:checked a user interface element tag which is checked (For example, radio-button, checkbox)
+★ tag:not(s) element tag if it's that does not match simple selector s.
+
+
+tag[attr] element tag, has attribute attr.
+tag[attr="val"] element tag, has attribute attr, value val.
+★ tag[attr^="val"] element tag, has attribute attr, value begins with "val"
+★ tag[attr$="val"] element tag, has attribute attr, value ends with "val"
+★ tag[attr*="val"] element tag, has attribute attr, value contains "val"
+tag[attr~="val"] element tag, has attribute attr, value is a list of space-separated values, one of which is exactly equal to val.
+tag[attr|="val"] element tag, has attribute attr, value is a hyphen-separated list of values beginning (from the left) with val.
+
+
+tag.val HTML only. Match tag tag that has class val. Same as tag[class~="val"]
+tag#val Match id val. Same as tag[id="val"]
+
+
+CSS selector for pseudo-elements
+Pattern Matches
+a:link a link.
+a:visited visited link.
+a:active a link while clicked but button not yet released.
+
+
+tag:hover mouse hover over a element tag
+tag:focus when a element is in focus (receive keys, etc. Press Tab ↹ to switch focus.)
+tag:lang(lang_code) element of type tag if it is in (human) language lang_code (the document language specifies how language is determined).
+
+
+
+
+http://xahlee.info/js/css_tag_matching.html
+
+
+If you have multiple tags and want them all to have the same appearance, you can use comma.
+span.x, span.y, span.z {font-weight:bold}
+
+
+you want to match a tag only if it is nested inside another tag. You can use the space to specify this, like this:
+
+
+div.abc span.xyz {color:red}
+
+
+match a tag only if it is a immediate child of a given parent tag. You can use the > to specify a parent-child relationship.
+
+
+Here's a example:
+
+
+div > span {color:red}
+
+
+
+
+https://www.weblinkindia.net/blog/make-content-seo-friendly-5-simple-ways
+
+
+Make ur content unique.
+Link    internal<-->externally
+
+
+Use sites like Google Analytics, MOZ or Hubspot to find solution for your keyword search. 
+
+
+Make sure to include your head keyword in the title, once or twice in the body, the meta-description and the URL too
+
+
+Add images videos
+
+
+Use Google optimized images
+
+
+Readable tells you the overall readability score of your content, Hemingway Editor, on the other hand, highlights sentences that are hard to read and then lets you make changes accordingly. Essay Mama makes your content SEO friendly and helps proofread and edit it while Plagtracker tells the originality of your content. Other tools that one can use for writing SEO-friendly content are Keyword Density Checker and SEO Optimization.
+
+
+
+
+http://www.jobhero.com/resume-samples/javascript-developer#
+
+
+http://www.javascriptkit.com/javatutors/oopjs3.shtml
+
+
+<script language="javascript" type="text/javascript">
+<!--
+
+
+// thanks to webreference
+
+
+function superClass() {
+  this.supertest = superTest; //attach method superTest
+}
+
+
+function subClass() {
+  this.inheritFrom = superClass;
+  this.inheritFrom();
+  this.subtest = subTest; //attach method subTest
+}
+
+
+function superTest() {
+  return "superTest";
+}
+ 
+function subTest() {
+  return "subTest";
+}
+
+
+var newClass = new subClass();
+
+
+  alert(newClass.subtest()); // yields "subTest"
+  alert(newClass.supertest()); // yields "superTest"
+
+
+//-->
+</script>
+
+
+-------------------------------------------
+Sub class and super class in Js
+<script language="javascript" type="text/javascript">
+<!--
+
+
+// thanks to webreference
+
+
+function superClass() {
+  this.supertest = superTest; //attach method superTest
+}
+
+
+function subClass() {
+  this.inheritFrom = superClass;
+  this.inheritFrom();
+  this.subtest = subTest; //attach method subTest
+}
+
+
+function superTest() {
+  return "superTest";
+}
+ 
+function subTest() {
+  return "subTest";
+}
+
+
+var newClass = new subClass();
+
+
+  alert(newClass.subtest()); // yields "subTest"
+  alert(newClass.supertest()); // yields "superTest"
+
+
+//-->
+</script>
+
+
+
+
+http://www.javascriptkit.com/javatutors/oopjs.shtml
+
+
+Creating objects using Literal Notation
+// Object Literals
+
+
+timObject = {
+property1 : "Hello",
+property2 : "MmmMMm",
+property3 : ["mmm", 2, 3, 6, "kkk"],
+method1 : function(){alert("Method had been called" + this.property1)}
+};
+
+
+timObject.method1();
+
+
+----------------------------------------------
+Creating objects using new Object()
+erson = new Object()
+person.name = "Tim Scarfe"
+person.height = "6Ft"
+
+
+person.run = function() {
+this.state = "running"
+this.speed = "4ms^-1"
+}
+
+
+
+
+http://www.javascriptkit.com/javatutors/oopjs2.shtml
+
+
+An object constructor can also called as class in java
+
+
+has properties and method declared inside,
+with help of THIS keyword.
+
+
+Instatiated using NEW keyword
+
+
+script language="javascript" type="text/javascript">
+<!--
+
+
+cat.prototype.changeName = function(name) {
+this.name = name;
+}
+
+
+firstCat = new cat("pursur")
+firstCat.changeName("Bill")
+firstCat.talk() //alerts "Bill says meeow!"
+
+
+Example for prototype in javascript
+script language="javascript" type="text/javascript">
+<!--
+
+
+cat.prototype.changeName = function(name) {
+this.name = name;
+}
+
+
+firstCat = new cat("pursur")
+firstCat.changeName("Bill")
+firstCat.talk() //alerts "Bill says meeow!"
+
+
+
+
+angular .element(document.querySelector('my-component')) .isolateScope();
+
+
+
+
+myApp.config(['$compileProvider', function ($compileProvider) {
+  $compileProvider.debugInfoEnabled(false);
+  $compileProvider.commentDirectivesEnabled(false);
+$compileProvider.cssClassDirectivesEnabled(false);
+}]);
+
+
+
+
+span ng-bind="name"></span> <br/>
+  <span ng:bind="name"></span> <br/>
+  <span ng_bind="name"></span> <br/>
+  <span data-ng-bind="name"></span> <br/>
+  <span x-ng-bind="name"></span> <br/> 
+
+
+all represent same thing
+
+
+
+
+/^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/
+
+
+handle regex for decimal numbers
+
+
+^[+]?([0-9]{0,3})$
+
+
+only for + digits
+
+
+
+
+data-’ prefix to make sure html validates and we do not cause IE7, 8 browsers to go into quirks mode. Very Important!!!!
+
+
+
+
+describe("Unit testing jquery directive", function() {
+      var $compile, $scope, element;
+      $scope = element = $compile = void 0;
+
+
+      // Load the module, which contains the directive
+      beforeEach(module("jqueryDirectives"));
+
+
+      // Store references to $rootScope and $compile so they are available to all tests in this describe block
+      beforeEach(inject(function(_$compile_, _$rootScope_) {
+
+
+        // The injector unwraps the underscores (_) from around the parameter names when matching
+        $scope = _$rootScope_;
+        return $compile = _$compile_;
+
+
+      }));
+
+
+      it("should slide Down a block", function() {
+
+
+        // Create html fragment
+        element = angular.element('<div class="form" data-my-slide="showForm">Text</div>');
+
+
+        // Set variable
+        $scope.showForm = true;
+
+
+        // Compile a piece of HTML containing the directive
+        $compile(element)($scope);
+        $scope.$digest();
+
+
+        // Set expectation
+        return expect(element.css('height')).toBe('1px');
+      });
+
+
+      it("should slide Up a block", function() {
+
+
+        // Create html fragment
+        element = angular.element('<div class="form" data-my-slide="showForm">Text</div>');
+
+
+        // Set variable
+        $scope.showForm = false;
+
+
+        // Compile a piece of HTML containing the directive
+        $compile(element)($scope);
+        $scope.$digest();
+
+
+        // Set expectation
+        return expect(element.css('height')).toBe('0px');
+      });
+
+
+    });
+We have created two tests where after compiling the code, our directive applies slideDown or slideUp.
+
+
+Based on jquery’s documentation the divs’ height gets primarily affected. We take this fact so as to evaluate the success of our directive.
+
+
+Now lets write the directive
+
+
+// Here we create a module to group these directives jquery related
+    var jqueryDirectives = angular.module("jqueryDirectives", []);
+
+
+    // Here we add a directive to the module. camelCase naming in this file (mySlide) and dash separated in html (my-Slide)
+    jqueryDirectives.directive("mySlide", [
+      function() {
+        return {
+
+
+          // This means the directive can be used as an attribute only. Example <div data-my-slide="variable"> </div>
+          restrict: "A",
+
+
+          // This is the functions that gets executed after Angular has compiled the html
+          link: function(scope, element, attrs) {
+
+
+            // We dont want to abuse on watch but here it is critical to determine if the parameter has changed.
+            scope.$watch(attrs.mySlide, function(newValue, oldValue) {
+
+
+              // This is our logic. If parameter is true slideDown otherwise slideUp.
+              // TODO: This should be transformed into css transition or angular animator if IE family supports it
+              if (newValue) {
+                return element.slideDown();
+              } else {
+                return element.slideUp();
+              }
+            });
+          }
+        };
+      }
+    ]);
+So now on both productAResults.html and productBResults.html we say
+
+
+<div class="search-details-form" data-my-slide="showRedoSearchDetails">
+
+
+
+
+.directive("directiveName",function () {
+
+
+    return {
+      controller: function() {
+        // controller code here...
+      },
+      compile: {
+ 
+        // compile code here...
+
+
+        return {
+
+
+          pre: function() {
+            // pre-link code here...
+          },
+     
+          post: function() {
+            // post-link code here...
+          }
+        };
+      }
+    }
+  })
+
+
+
+
+module.exports = function(grunt) {
+
+
+  // A very basic default task.
+  grunt.registerTask('default', 'Log some stuff.', function() {
+    grunt.log.write('Logging some stuff...').ok();
+  });
+
+
+};
+
+
+
+
+module.exports = function(grunt) {
+
+
+  // Project configuration.
+  grunt.initConfig({
+    pkg: '<json:package.json>',
+    concat: {
+      dist: {
+        src: 'public/js/*.js',
+        dest: 'public/js/concat.js'
+      }
+    },
+    min: {
+      dist: {
+        src: 'public/js/concat.js',
+        dest: 'public/js/concat.min.js'
+      }
+    },
+    jshint: {
+      options: {
+        curly: true,
+        eqeqeq: true,
+        immed: true,
+        latedef: true,
+        newcap: true,
+        noarg: true,
+        sub: true,
+        undef: true,
+        boss: true,
+        eqnull: true,
+        node: true
+      },
+      globals: {
+        exports: true,
+        module: false
+      }
+    },
+    uglify: {}
+  });
+
+
+  // Default task.
+  grunt.registerTask('default', 'concat min');
+
+
+};
+
+
+
+
+
+
+
+Math.floor(Math.random()*10)
+
+
+
+
+^(?!.{59})(?:[0-9a-zA-Z/.//!////#//$//%//^//&//*//_//|//+//=//{//}//`//'///-]+@[a-zA-Z0-9]+([/-]{0,1}[a-zA-Z0-9]|[/_]{0,1}[a-zA-Z0-9])+([/.][a-zA-Z]{2,4}|[/.][a-zA-Z]{2,4}[/.][a-zA-Z]{2,4})|)$
+
+
+
+
+modified email regex
+
+
+
+
+You can find long explanations in the angularjs docs and stackoverflow. Here the short cheatsheet:
+
+
+@ ---> bind strings in
+= ---> double bind variable
+& ---> bind expression with arguments both coming from the outside scope and the inner scope. Like in ng-click="clicked($event, myVar)". $event comes from the ng-click directive and myVar from your containing scope
+271 Views · View Upvotes
+Upvote1DownvoteComment
+Share
+Gustavo Bicalho
+Gustavo Bicalho
+Written Mar 30, 2015
+angular.module('foo',[])
+  .controller('FooController',['$scope',function($scope) {
+    $scope.someVar = 'funny';
+    $scope.anotherVar = 'FUnNy';
+  }])
+  .directive('fooBar',function() {
+    return {
+      restrict: 'E',
+      scope: {
+        theString: '@',
+        theSecondString: '@',
+        theTwoway: '=',
+        theExpression: '&'
+      },
+      template: [
+          '<div style="border:1px solid red">',
+            '<h1>{{theString}}</h1>',
+            '<h2>{{theSecondString}}</h2>',
+            '<input id="one" ng-model="theTwoway" /><br>',
+            '<button ng-click="theExpression()">Do something</button>',
+          '</div>'
+        ].join('')
+    };
+  });
+
+
+If you put the above directive in a page with the following code:
+
+
+<div ng-app="foo" ng-controller="FooController">
+  <div>
+    {{someVar}}, {{anotherVar}}<br><br>
+    <foo-bar
+        the-string="someVar"
+        the-second-string="really {{someVar}} {{anotherVar}}"
+        the-twoway="someVar"
+        the-expression="someVar = anotherVar"></foo-bar>
+  </div>
+</div>
+
+
+(See Isolated scope types - JSFiddle)
+
+
+The <h1> tag in the directive will show the text someVar, because @ just passes whatever string is is the attribute of the directive element to the isolated scope.
+The <h2> tag in the directive will show the text really funny FUnNy - this shows how the @ scope entry can take advantages of interpolation, even though it has to result in a string.
+So @ isolated scopes just passes a string to the isolated scope, but, when used with interpolation, can create a one-way string-only binding between parent scope and isolated scope.
+
+
+The text input in the directive will initially show funny, but if you change it, the value of the someVar variable on the parent scope. As a consequence, the text in the <h2> element will also change (because of the interpolation).
+The = isolated scope entry will create a two-way binding between some assinable expression in the parent scope and a member in the isolated scope.
+That means that if you put some non-assinable expression in the the-twoway attribute of our directive, you'll get an error when you try to change the text field. That's because angular can get the value from the parent scope and give it to the isolated scope, but cannot do the reverse.
+
+
+Finally, when you click the "Do something" button on the directive, the expression "someVar = anotherVar" will be evaluated on the parent scope. someVar will now contain 'FUnNy', and both the text input and the <h2> element will be updated accordingly. Note how we call theExpression as a function in the ng-click event.
+The & isolated scope entry creates a function on the isolated scope taht, when called, will evaluate an expression in the parent scope, and return that value. Of course, any side effects of that evaluation (for example, that changing of a value of a variable) will happen in the parent scope.
+So the & binding can be used for throwing "events" to the parent scope. It can also be used as a one-way binding that supports objects (intead of the @ bind with interpolation, which only passes a string to the isolated scope).
+
+
+
+
+Bower keeps the track of all packages in manifest file --->>BOWER>JSON
+
+
+npm install -g bower
+Bower requires node, npm and git.
+
+
+
+
+bower init --> to create a new bower.json ~~~ package .json to node js~~~~~~Ruby’s Gemfile.
+
+
+
+
+// to install packages using bower
+bower install
+# installs the project dependencies listed in bower.json
+$ bower install
+# registered package
+$ bower install jquery
+# GitHub shorthand
+$ bower install desandro/masonry
+# Git endpoint
+$ bower install git://github.com/user/package.git
+# URL
+$ bower install http://example.com/script.js
+
+
+Then save new dependencies to your bower.json with bower install PACKAGE --save
+
+
+We recommend you use Bower together with Grunt, RequireJS, Yeoman
+and lots of other tools or build your own workflow with the API.
+
+
+Use it as <script src="bower_components/jquery/dist/jquery.min.js"></script>
+in your html file
+
+
+
+
+Using bower install <package> --save will add <package> to your project’s bower.json dependencies array.
+# install package and add it to bower.json dependencies
+
+
+$ bower install <package> --save
+Similarly, using bower install <package> --save-dev will add <package> to your project’s bower.json devDependencies array.
+
+
+# install package and add it to bower.json devDependencies
+$ bower install <package> --save-dev
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+you can create a new package our selves and register it to github
+
+
+$ bower register <my-package-name> <git-endpoint>
+# for example
+$ bower register example git://github.com/user/example.git
+
+
+
+
+But it must follow the bower specifiaction. AS FOLLOWS
+1. The package name must adhere to the bower.json spec.
+2 .There must be a valid bower.json in the project’s root directory.
+3. Your package should use semver Git tags. The v prefix is allowed.
+4. Your package must be publically available at a Git endpoint (e.g., GitHub). Remember to
+push your Git tags!
+5. For private packages (e.g. GitHub Enterprise), please consider running a private Bower registry.
+
+
+
+
+
+
+Al  bower commands
+cache
+help
+home
+info
+init
+install
+link
+list
+login
+lookup
+prune
+register
+search
+update
+uninstall
+version
+
+
+
+
+http://tinyurl.com/AngularJSJumpStart
+http://tinyurl.com/AngularJSDemos
+
+
+
+
+var app = angular.module("app", ['ngRoute']);
+app.config(function ($routeProvider) {
+    $routeProvider
+      .when('/', {
+        templateUrl: 'main',
+        controller: 'main'
+      })
+      .when('/detail/:id', {
+        templateUrl: 'detail',
+        controller: 'detail'
+      })
+      .otherwise({
+        redirectTo: '/'
+      });
+  }); 
+
+
+
+
+Ankur Sharma shared a question on Quora with you
+
+
+Question on @Quora: Which would be the best place in Bangalore to take my fiance for our first date? https://www.quora.com/Which-would-be-the-best-place-in-Bangalore-to-take-my-fiance-for-our-first-date?srid=n7El&share=ea5dc3b8
+
+
+
+
+$(window).bind('beforeunload', function(e) {
+
+
+          if (1)
+          {
+            return "Unloading this page may lose .What do you want to do..."
+              e.preventDefault();
+          }
+      });
+
+
+
+
+var initCase=function(a){
+return a.substring(0,1).toUpperCase()+a.substr(1)
+}
+
+
+
+
+.directive('typeaheadFocuss', function () {
+return {
+  require: 'ngModel',
+  link: function (scope, element, attr, ngModel) {
+
+
+    //trigger the popup on 'click' because 'focus'
+    //is also triggered after the item selection
+    element.bind('click', function () {
+
+
+      var viewValue = ngModel.$viewValue;
+
+
+      //restore to null value so that the typeahead can detect a change
+      if (ngModel.$viewValue == ' ') {
+        ngModel.$setViewValue(null);
+      }
+
+
+      //force trigger the popup
+      ngModel.$setViewValue(' ');
+
+
+      //set the actual value in case there was already a value in the input
+      ngModel.$setViewValue(viewValue || ' ');
+    });
+
+
+    //compare function that treats the empty space as a match
+    scope.emptyOrMatch = function (actual, expected) {
+      if (expected == ' ') {
+        return true;
+      }
+      return actual.indexOf(expected) > -1;
+    };
+  }
+};
+})
+
+
+
+
+----------------*/
+
+
+open a typeahead in angularjs on focus
+
+
+              $scope.onFocusOpenTypeaHead = function (e) {
+                if (e) {
+                  $timeout(function () {
+                    $(e.target).trigger('input');
+                    $(e.target).trigger('change'); // for IE
+                  });
+                }
+
+
+             };
+
+
+
+
+^((0?[1-9]|[12][0-9]|3[01])(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)|)$
+
+
+
+
+myApp.directive('dateFix', ['dateFilter', 'datepickerPopupConfig', function(dateFilter, datepickerPopupConfig) {
+    // return the directive link function. (compile function not needed)
+    return {
+        restrict: 'EA',
+        require: 'ngModel', // get a hold of NgModelController
+
+
+        link: function(scope, element, attrs, ngModel) {
+
+
+            var format = attrs.datepickerPopup;
+            var maxDate = scope[attrs.max];
+            var minDate = scope[attrs.min];
+            var datefilter = dateFilter;
+            var model = ngModel;
+
+
+            ngModel.$parsers.push(function(viewValue) {
+                var newDate = model.$viewValue;
+                var date = null;
+
+
+                // pass through if we clicked date from popup
+                if (typeof newDate === "object" || newDate == "") return newDate;
+
+
+                // build a new date according to initial localized date format
+                if (format === "dd.MM.yyyy") {
+                    // extract day, month and year
+                    var splitted = newDate.split('.');
+
+
+                    var month = parseInt(splitted[1]) - 1;
+                    date = new Date(splitted[2], month, splitted[0]);
+                    // if maxDate,minDate is set make sure we do not allow greater values
+                    if (maxDate && date > maxDate) date = maxDate;
+                    if (minDate && date < minDate) date = minDate;                   
+
+
+                    model.$setValidity('date', true);
+                    model.$setViewValue(date);
+                }
+                return date ? date : viewValue;
+            });
+
+
+            element.on('keydown', {scope:scope, varOpen:attrs.isOpen}, function(e) {
+                var response = true;
+                // the scope of the date control
+                var scope = e.data.scope;
+                // the variable name for the open state of the popup (also controls it!)
+                var openId = e.data.varOpen;
+
+
+                switch (e.keyCode) {
+                case 13: // ENTER
+                    scope[openId] = !scope[openId];
+                    // update manually view
+                    if (!scope.$$phase) scope.$apply();
+                    response = false;
+                    break;
+
+
+                case 9: // TAB
+                    scope[openId] = false;
+                    // update manually view
+                    if (!scope.$$phase) scope.$apply();
+                    break;
+                }
+
+
+                return response;
+            });
+
+
+            // set input to the value set in the popup, which can differ if input was manually!
+            element.on('blur', {scope:scope}, function(e) {
+                // the value is an object if date has been changed! Otherwise it was set as a string.
+                if (typeof model.$viewValue === "object") {
+                    element.context.value = isNaN(model.$viewValue) ? "" : dateFilter(model.$viewValue, format);
+                    if (element.context.value == "") model.$setValidity('required', false);                   
+                }
+            });
+        }
+    };
+}]);
+
+
+
+
+date parser in angualr js
+
+
+evsDirectives.directive('dateParser', function () {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, element, attrs, ctrl) {
+            if (!ctrl)
+                return;
+
+
+            ctrl.$parsers.unshift(function (data) {
+                // convert data from view format to model format
+                return this.parseEuropeanShortDate(data);
+            });
+        }
+    };
+
+
+    //parses a date in dd/MM/yyyy format
+    //returns the input value if not a valid date
+    parseEuropeanShortDate: function (d) {
+        if (this.isDate(d)) {
+            return d;
+        }
+       
+        else {
+            var fragments = d.split('/');
+            var result = new Date(Date.UTC(fragments[2], fragments[1] - 1, fragments[0])); // converted
+            return (this.isValidDate(result)) ? result : d;    
+        }
+    }
+
+
+});
+
+
+
+
+Controllers - [file_name].ctrl.jsTemplates - [file_name].tpl.htmlDirectives - [file_name].drct.jsFactories - [file_name].fct.jsValues - [file_name].val.jsServices - [file_name].srv.jsModules - [app_name].[module_name].js
+
+
+
+
+$scope.$watch() - To watch for changes on scope properties
+$scope.$watchCollection() - Similar to watch except with a shallower comparison for increased performance
+$scope.$eval() - Evaluates an expression against the scope$scope.$emit() - Emit custom events
+$scope.$on() - Listen for and act on events
+
+
+
+
+
+ 
+Skill to love your own self. Unconditionally. 
+
+
+This according to me is the most valuable skill a person can have for their entire life. 
+
+
+Think about it. 
+
+
+Most of the problems in life will never arise once this skill is mastered.
